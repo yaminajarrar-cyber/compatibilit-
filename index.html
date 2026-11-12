@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz de compatibilité</title>
+<style>
+:root{--bg:#fff5f7;--card:#fff;--tx:#2b1a2e;--mut:#7a6680;--p1:#ff4f81;--p2:#7c4dff;--line:#f0d9e2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1020;--card:#2a1b33;--tx:#fbeef5;--mut:#b9a3c2;--line:#4a3358}}
+:root[data-theme="dark"]{--bg:#1a1020;--card:#2a1b33;--tx:#fbeef5;--mut:#b9a3c2;--line:#4a3358}
+html{color-scheme:light dark}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+#app{max-width:520px;margin:0 auto;padding:20px 16px 40px;text-align:center}
+h1{font-size:2rem;margin:8px 0;background:linear-gradient(90deg,var(--p1),var(--p2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.big{font-size:3.2rem;margin:10px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 6px 20px rgba(124,77,255,.12)}
+p{color:var(--mut);line-height:1.45}
+input{width:100%;box-sizing:border-box;padding:12px;margin:6px 0;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--tx);font-size:1rem}
+button{font:inherit;cursor:pointer}
+.btn{background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;border:0;border-radius:999px;padding:13px 28px;font-weight:700;font-size:1rem;margin-top:10px}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);color:var(--tx);border:2px solid var(--line);border-radius:14px;padding:13px;margin:8px 0;font-size:1rem}
+.opt:active,.opt:hover{border-color:var(--p1)}
+.prog{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin-bottom:6px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--p1),var(--p2));transition:width .3s}
+.tag{display:inline-block;padding:4px 12px;border-radius:999px;background:var(--p2);color:#fff;font-size:.8rem;font-weight:700}
+.meter{height:22px;background:var(--line);border-radius:99px;overflow:hidden;margin:10px 0}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--p1),var(--p2));transition:width 1.6s ease-out}
+.pct{font-size:4rem;font-weight:800;margin:0}
+.row{text-align:left;font-size:.92rem;padding:8px 0;border-top:1px solid var(--line)}
+.ok{color:#1fa971}.ko{color:#e0445a}
+.hl{font-weight:800;font-size:1.25rem;color:var(--p1);border:2px solid var(--p1);animation:pop .7s 1.6s both}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+#hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:10}
+#hearts span{position:absolute;bottom:-60px;animation:up linear infinite}
+@keyframes up{to{transform:translateY(-115vh) rotate(25deg);opacity:.3}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var Q=[
+{q:"Un samedi parfait, c’est…",o:["Grasse mat’ puis séries","Rando ou grand air","Sortie entre amis","Resto et balade en ville"]},
+{q:"Je pars en voyage : je choisis…",o:["Plage et farniente","Ville et musées","Montagne et nature","Road trip improvisé"]},
+{q:"Mon plat réconfort :",o:["Pizza","Pâtes","Burger-frites","Plat de grand-mère"]},
+{q:"Le matin, je suis plutôt…",o:["Tête d’ours, ne me parlez pas","Frais(che) dès le réveil","Il me faut 3 cafés","Je snooze 12 fois"]},
+{q:"Mon super-pouvoir rêvé :",o:["Voler","Voyager dans le temps","Lire dans les pensées","Être invisible"]},
+{q:"En soirée, je suis…",o:["Sur la piste de danse","Dans la cuisine à discuter","Sur le canapé avec le chien/chat","Parti(e) à l’anglaise à 23h"]},
+{q:"Mon plus grand défaut :",o:["Retardataire","Têtu(e)","Trop gourmand(e)","Pas très ordonné(e)"]},
+{q:"Un message reçu, je réponds…",o:["Tout de suite","Dans l’heure","Le lendemain","Jamais, j’ai lu dans ma tête"]},
+{q:"Mon film du dimanche soir :",o:["Comédie","Thriller","Romance","Animation / Disney"]},
+{q:"Si je gagne au loto, je…",o:["Voyage partout","Achète une maison","Investis sagement","Dépense tout en un mois"]},
+{q:"Série : je suis plutôt…",o:["Binge-watching toute la nuit","Un épisode par soir, pas plus","Je regarde en faisant autre chose","Je n’ai jamais fini une série"]},
+{q:"Ma série préférée est plutôt…",o:["Policière / thriller","Comédie / sitcom","Fantastique / SF","Drame / romance"]},
+{q:"Une série où le héros meurt à la fin de la saison 1 :",o:["J’arrête immédiatement","Je pleure puis je continue","Je vais lire les spoilers","Je boycotte les scénaristes"]},
+{q:"Au cinéma, je…",o:["Prends un énorme pop-corn","Préfère regarder chez moi","Choisis toujours le dernier rang","M’endors au bout de 30 minutes"]},
+{q:"Mon genre de film préféré :",o:["Action / aventure","Horreur / frissons","Comédie romantique","Film d’auteur / documentaire"]},
+{q:"Au travail, je suis plutôt…",o:["Ultra organisé(e)","Le roi / la reine du dernier moment","Leader naturel","Discret(e) mais efficace"]},
+{q:"Mon job idéal, c’est…",o:["Stable, avec un bon salaire","Passionnant, même moins payé","Mon propre patron","Pouvoir télétravailler depuis la plage"]},
+{q:"Dans 10 ans, je me vois…",o:["À l’étranger","Dans une maison avec jardin","En ville, bien installé(e)","Je n’en ai aucune idée"]},
+{q:"Pour la vie future, je rêve de…",o:["Une grande famille","Une vie à deux tranquille","Une carrière brillante","Une vie de voyages"]},
+{q:"Pour le mariage, je suis…",o:["Cérémonie de rêve avec tout le monde","Petit comité intime","Direction la mairie puis au resto","Pas fan du mariage"]}
+];
+var N=Q.length,names=["",""],ans=[[],[]],gue=[[],[]],step=0,qi=0;
+var seq=[[0,"a"],[1,"g"],[1,"a"],[0,"g"]];
+var app=document.getElementById("app");
+function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function nm(i){return esc(names[i]||("Joueur "+(i+1)))}
+
+function home(){
+ var hh=document.getElementById("hearts");if(hh)hh.remove();
+ app.innerHTML='<div class="big">💘</div><h1>Quiz de compatibilité</h1><p>Chacun répond, puis l’autre doit deviner ses réponses. À la fin : votre % de compatibilité !</p><div class="card"><input id="n0" placeholder="Prénom du joueur 1" maxlength="20"><input id="n1" placeholder="Prénom du joueur 2" maxlength="20"></div><button class="btn" id="go">C’est parti ✨</button>';
+ document.getElementById("go").onclick=function(){
+  names=[document.getElementById("n0").value.trim(),document.getElementById("n1").value.trim()];
+  ans=[[],[]];gue=[[],[]];step=0;qi=0;intro();
+ };
+}
+function intro(){
+ var p=seq[step][0],t=seq[step][1],o=1-p;
+ var msg=t=="a"?"Réponds sincèrement à tes questions. "+nm(o)+", ferme les yeux 🙈":"Devine ce que "+nm(o)+" a répondu. "+nm(o)+", pas de soufflage 🤫";
+ app.innerHTML='<div class="big">'+(t=="a"?"📝":"🔮")+'</div><h1>Au tour de '+nm(p)+'</h1><span class="tag">Manche '+(step+1)+'/4 · '+(t=="a"?"Tes réponses":"Tes devinettes")+'</span><div class="card"><p>'+msg+'</p></div><button class="btn" id="ok">Je suis prêt(e)</button>';
+ document.getElementById("ok").onclick=function(){qi=0;ask()};
+}
+function ask(){
+ var p=seq[step][0],t=seq[step][1],o=1-p,q=Q[qi];
+ var title=t=="a"?q.q:"Selon toi, "+nm(o)+" a répondu quoi à :<br><b>"+q.q+"</b>";
+ var h='<div class="prog"><i style="width:'+(qi/N*100)+'%"></i></div><p>Question '+(qi+1)+'/'+N+' · '+nm(p)+'</p><div class="card"><h3 style="margin:0 0 8px">'+title+'</h3>';
+ q.o.forEach(function(x,i){h+='<button class="opt" data-i="'+i+'">'+x+'</button>'});
+ app.innerHTML=h+'</div>';
+ Array.prototype.forEach.call(app.querySelectorAll(".opt"),function(b){
+  b.onclick=function(){
+   (t=="a"?ans:gue)[p][qi]=+b.dataset.i;
+   qi++;
+   if(qi<N)ask();else{step++;step<4?intro():result()}
+  };
+ });
+}
+function score(p){var s=0;for(var i=0;i<N;i++)if(gue[p][i]===ans[1-p][i])s++;return s}
+function result(){
+ var s0=score(0),s1=score(1),pct=Math.round((s0+s1)/(2*N)*100);
+ var v=pct>=85?["🔥","Âmes sœurs !","Vous vous connaissez par cœur."]:pct>=65?["😍","Duo en or","Une belle complicité, bravo."]:pct>=45?["😎","Sur la bonne voie","Encore quelques soirées pour mieux se découvrir."]:pct>=25?["🤔","Mystère mystère","Les opposés s’attirent, paraît-il…"]:["🙈","Plein de surprises","Vous avez tout à découvrir l’un sur l’autre !"];
+ var h='<div class="big">'+v[0]+'</div><h1>'+v[1]+'</h1><p class="pct" id="pct">0%</p><div class="meter"><i id="m"></i></div><p>'+v[2]+'</p>'+(pct>60?'<div class="card hl">Un hlel est obligatoire, sinon t’es mort</div>':'')+(pct>85?'<div class="card hl" style="animation-delay:2.4s">T’inquiète bb je m’occupe de tout et je viens te khtob</div>':'');
+ h+='<div class="card"><b>'+nm(0)+'</b> devine '+nm(1)+' : <b>'+s0+'/'+N+'</b><br><b>'+nm(1)+'</b> devine '+nm(0)+' : <b>'+s1+'/'+N+'</b></div><div class="card" style="text-align:left"><b>Le détail</b>';
+ for(var i=0;i<N;i++){
+  h+='<div class="row">'+Q[i].q+'<br>'+nm(0)+' : '+Q[i].o[ans[0][i]]+' <span class="'+(gue[1][i]===ans[0][i]?"ok":"ko")+'">'+(gue[1][i]===ans[0][i]?"✔":"✘ ("+nm(1)+" : "+Q[i].o[gue[1][i]]+")")+'</span><br>'+nm(1)+' : '+Q[i].o[ans[1][i]]+' <span class="'+(gue[0][i]===ans[1][i]?"ok":"ko")+'">'+(gue[0][i]===ans[1][i]?"✔":"✘ ("+nm(0)+" : "+Q[i].o[gue[0][i]]+")")+'</span></div>';
+ }
+ app.innerHTML=h+'</div><button class="btn" id="re">Rejouer 🔁</button>';
+ document.getElementById("re").onclick=home;
+ if(pct>60)setTimeout(function(){var c=document.createElement("div");c.id="hearts";for(var i=0;i<40;i++){var s=document.createElement("span");s.textContent=["❤️","💖","💘","💕"][i%4];s.style.left=Math.random()*100+"%";s.style.animationDuration=(4+Math.random()*4)+"s";s.style.animationDelay=(Math.random()*4)+"s";s.style.fontSize=(18+Math.random()*26)+"px";c.appendChild(s)}document.body.appendChild(c)},1600);
+ setTimeout(function(){document.getElementById("m").style.width=pct+"%"},50);
+ var c=0,iv=setInterval(function(){c++;document.getElementById("pct").textContent=Math.min(c,pct)+"%";if(c>=pct)clearInterval(iv)},1600/Math.max(pct,1));
+}
+home();
+</script>
+</body>
+</html>
